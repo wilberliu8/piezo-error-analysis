@@ -175,7 +175,7 @@ body {
     <!-- ── 旋转机械振动 ── -->
     <div class="section-label">▸ 周边旋转机械振动</div>
     <div class="toggle-row">
-      <input type="checkbox" id="cbMachine">
+      <input type="checkbox" id="cbMachine" checked>
       <label for="cbMachine">启用</label>
       <span class="hint">（电机/泵/压缩机等）</span>
     </div>
@@ -303,15 +303,15 @@ body {
         meqInput.value = defaults.meq; noiseFloor.value = defaults.noiseFloor;
         cbBuilding.checked = true; buildingFreq.value = defaults.buildingFreq; buildingAmp.value = defaults.buildingAmp;
         buildingParams.classList.add('active');
-        cbMachine.checked = false; machineFreq.value = defaults.machineFreq; machineAmp.value = defaults.machineAmp;
-        machineParams.classList.remove('active');
+        cbMachine.checked = true; machineFreq.value = defaults.machineFreq; machineAmp.value = defaults.machineAmp;
+        machineParams.classList.add('active');
       }
     } catch (e) {
       meqInput.value = defaults.meq; noiseFloor.value = defaults.noiseFloor;
-      cbBuilding.checked = true; cbMachine.checked = false;
+      cbBuilding.checked = true; cbMachine.checked = true;
       buildingFreq.value = defaults.buildingFreq; buildingAmp.value = defaults.buildingAmp;
       machineFreq.value = defaults.machineFreq; machineAmp.value = defaults.machineAmp;
-      buildingParams.classList.add('active'); machineParams.classList.remove('active');
+      buildingParams.classList.add('active'); machineParams.classList.add('active');
     }
     updatePreview();
   }
@@ -334,8 +334,8 @@ body {
   btnReset.addEventListener('click', () => {
     meqInput.value = defaults.meq; noiseFloor.value = defaults.noiseFloor;
     cbBuilding.checked = true; buildingFreq.value = defaults.buildingFreq; buildingAmp.value = defaults.buildingAmp;
-    cbMachine.checked = false; machineFreq.value = defaults.machineFreq; machineAmp.value = defaults.machineAmp;
-    buildingParams.classList.add('active'); machineParams.classList.remove('active');
+    cbMachine.checked = true; machineFreq.value = defaults.machineFreq; machineAmp.value = defaults.machineAmp;
+    buildingParams.classList.add('active'); machineParams.classList.add('active');
     updatePreview();
   });
 
