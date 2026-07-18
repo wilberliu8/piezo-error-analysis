@@ -274,7 +274,7 @@ body {
    <div class="set-row">
      <label>显示范围</label>
      <input type="number" id="fftXMin" value="0" min="0" disabled> ~
-     <input type="number" id="fftXMax" value="10000" min="10" max="10000" step="100"> Hz
+     <input type="number" id="fftXMax" value="800" min="10" max="10000" step="100"> Hz
    </div>
    <div class="set-row">
      <label>幅度Y</label>
@@ -357,9 +357,9 @@ body {
  // State — Signal
  // ═══════════════════════════════════════════
  let components = [
-   { type: 'sine', amp: 20, freq: 300, phase: 0, duty: 0, tStart: 0, tEnd: Infinity },
-   { type: 'sine', amp: 20, freq: 50,  phase: 0, duty: 0, tStart: 0, tEnd: Infinity },
-   { type: 'sine', amp: 10, freq: 700, phase: 0, duty: 0, tStart: 0, tEnd: Infinity }
+   { type: 'sine', amp: 20, freq: 300, phase: 0, duty: 0, tStart: 0, tEnd: 0 },
+   { type: 'sine', amp: 20, freq: 50,  phase: 0, duty: 0, tStart: 0, tEnd: 0 },
+   { type: 'sine', amp: 10, freq: 700, phase: 0, duty: 0, tStart: 0, tEnd: 0 }
  ];
  let running = false;
 
@@ -378,9 +378,9 @@ const FACTOR_DEFS = [
   { id: "freqresp",  name: "频响",   icon: "📶", color: "#9b59b6", configPage: "freqresp_config.html",
     storageKey: "piezo_factor_freqresp",  defaultParams: { fn: 1.2, ms: 50, M: 50 } },
   { id: "crosstalk", name: "串扰",   icon: "↔",  color: "#f1c40f", configPage: "crosstalk_config.html",
-    storageKey: "piezo_factor_crosstalk", defaultParams: { ratio: 0.5, freq: 60, amp: 5000, type: 'sine' } },
+    storageKey: "piezo_factor_crosstalk", defaultParams: { ratio: 0.5, freq: 60, amp: 1000, type: 'sine' } },
   { id: "envnoise",  name: "噪声",   icon: "🌊", color: "#2ecc71", configPage: "noise_config.html",
-    storageKey: "piezo_factor_envnoise",  defaultParams: { meq: 200, noiseFloor: 5, buildingFreq: 5, buildingAmp: 0.003, machineFreq: 500, machineAmp: 0.01 } },
+    storageKey: "piezo_factor_envnoise",  defaultParams: { meq: 200, noiseFloor: 5, buildingFreq: 5, buildingAmp: 0.003, machineFreq: 200, machineAmp: 0.001 } },
 ];
 const factorParams = {};    // { drift: {rate, sensitivity}, ... }
 const factorConfigured = {}; // { drift: bool, ... }
@@ -401,7 +401,7 @@ let stackComponents = { original: false, drift: false, linearity: false, freqres
  let fftLines = 4096;
  let winType = 'hann';
  let fftCompMax = 5000; // computation max freq (for decimation)
- let fftXMin = 0, fftXMax = 1000; // display range
+ let fftXMin = 0, fftXMax = 800; // display range
 
  // Axis
  let oscYAuto = true, oscYMin = -1, oscYMax = 1;
