@@ -345,6 +345,8 @@ body {
 
 <script>
 (function() {
+ const APP_VERSION = 1;
+
  // ═══════════════════════════════════════════
  // Constants
  // ═══════════════════════════════════════════
@@ -2550,6 +2552,7 @@ if (rbT[idx] < targetT) lo = mid + 1;
   function saveState() {
     try {
       const st = {
+        version: APP_VERSION,
         components, oscTimeMode, oscSpan, oscFXMin, oscFXMax,
         fftLines, winType, fftCompMax, fftXMin, fftXMax,
         oscYAuto, oscYMin, oscYMax, specYAuto, specYMin, specYMax
@@ -2570,6 +2573,7 @@ if (rbT[idx] < targetT) lo = mid + 1;
         if (v === '-Infinity') return -Infinity;
         return v;
       });
+      if (st.version !== APP_VERSION) return; // ignore stale cache
       if (st.components) {
         components = st.components.map(c => ({
           ...c,
