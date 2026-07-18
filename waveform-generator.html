@@ -397,10 +397,10 @@ let stackComponents = { original: false, drift: false, linearity: false, freqres
  let lastT = performance.now(), fc = 0, fpsT = performance.now(), curFPS = 60;
 
  // FFT settings
- let fftLines = 8192;
+ let fftLines = 4096;
  let winType = 'hann';
- let fftCompMax = 10000; // computation max freq (for decimation)
- let fftXMin = 0, fftXMax = 10000; // display range
+ let fftCompMax = 1000; // computation max freq (for decimation)
+ let fftXMin = 0, fftXMax = 1000; // display range
 
  // Axis
  let oscYAuto = true, oscYMin = -1, oscYMax = 1;
