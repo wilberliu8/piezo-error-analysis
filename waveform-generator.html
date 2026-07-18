@@ -379,7 +379,7 @@ const FACTOR_DEFS = [
   { id: "crosstalk", name: "串扰",   icon: "↔",  color: "#f1c40f", configPage: "crosstalk_config.html",
     storageKey: "piezo_factor_crosstalk", defaultParams: { ratio: 0.5, freq: 60, amp: 5000, type: 'sine' } },
   { id: "envnoise",  name: "噪声",   icon: "🌊", color: "#2ecc71", configPage: "noise_config.html",
-    storageKey: "piezo_factor_envnoise",  defaultParams: { meq: 200, noiseFloor: 5, buildingFreq: 5, buildingAmp: 0.003, machineFreq: 200, machineAmp: 0.001 } },
+    storageKey: "piezo_factor_envnoise",  defaultParams: { meq: 200, noiseFloor: 5, buildingFreq: 5, buildingAmp: 0.003, machineFreq: 500, machineAmp: 0.01 } },
 ];
 const factorParams = {};    // { drift: {rate, sensitivity}, ... }
 const factorConfigured = {}; // { drift: bool, ... }
