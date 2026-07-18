@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>串扰设置 — 压电测力系统</title>
+<style>
+:root {
+  --bg: #14161a; --bg-card: #1c1f26; --bg-input: #242730;
+  --border: #2e3139; --text: #d8dce3; --text-dim: #88909e;
+  --accent: #3388cc; --signal-cr: #f1c40f; --warn: #d29922;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Microsoft YaHei", "Helvetica Neue", sans-serif;
+  font-size: 14px; line-height: 1.5;
+  min-height: 100vh; display: flex; flex-direction: column;
+}
+.header {
+  width: 100%; background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px; display: flex; align-items: center; gap: 14px;
+  flex-shrink: 0;
+}
+.header .logo { font-size: 1.2em; font-weight: 700; color: var(--text); }
+.header .subtitle { font-size: 0.85em; color: var(--text-dim); }
+.back-link {
+  color: var(--text-dim); text-decoration: none; font-size: 0.85em;
+  margin-left: auto; transition: color 0.15s;
+}
+.back-link:hover { color: var(--accent); }
+.main {
+  flex: 1; display: flex; padding: 40px 20px; justify-content: center;
+}
+.form-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 8px; padding: 28px 32px; width: 420px;
+}
+.form-card .card-title {
+  font-size: 1.1em; font-weight: 700; color: var(--text); margin-bottom: 6px;
+}
+.form-card .card-desc {
+  font-size: 0.82em; color: var(--text-dim); margin-bottom: 24px;
+}
+.section-label {
+  font-size: 0.78em; color: var(--text-dim);
+  text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px;
+}
+.form-group { margin-bottom: 16px; }
+.form-group label {
+  display: block; font-size: 0.85em; color: var(--text-dim); margin-bottom: 4px;
+}
+.form-group .input-row { display: flex; align-items: center; gap: 6px; }
+.form-group input, .form-group select {
+  flex: 1; background: var(--bg-input); border: 1px solid var(--border);
+  color: var(--text); padding: 7px 10px; border-radius: 4px;
+  font-size: 0.95em; font-family: inherit;
+  transition: border-color 0.15s;
+}
+.form-group input:focus, .form-group select:focus { outline: none; border-color: var(--accent); }
+.form-group .unit { font-size: 0.85em; color: var(--text-dim); width: 60px; flex-shrink: 0; text-align: center; }
+.form-group select { cursor: pointer; }
+
+.section-divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+.preview-box {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 5px; padding: 12px 14px; margin-bottom: 24px;
+  font-size: 0.82em; color: var(--text-dim);
+}
+.preview-box .eq-error {
+  font-size: 1em; color: var(--signal-cr); font-weight: 600; margin-top: 4px;
+}
+.preview-box .eq-detail { font-size: 0.85em; color: var(--text-dim); margin-top: 2px; }
+
+.btn-row { display: flex; gap: 10px; }
+.btn-save {
+  flex: 1; background: var(--accent); border: none; color: #fff;
+  padding: 10px 0; border-radius: 5px; font-size: 0.95em; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: opacity 0.15s;
+}
+.btn-save:hover { opacity: 0.88; }
+.btn-reset {
+  background: var(--bg-input); border: 1px solid var(--border);
+  color: var(--text-dim); padding: 10px 18px; border-radius: 5px;
+  font-size: 0.85em; cursor: pointer; font-family: inherit;
+  transition: all 0.15s;
+}
+.btn-reset:hover { color: var(--text); border-color: #4a505e; }
+.saved-toast {
+  display: none; background: #1a3a1a; border: 1px solid #2d5a2d;
+  color: #6fcf6f; padding: 8px 14px; border-radius: 5px;
+  font-size: 0.82em; margin-top: 12px; text-align: center;
+}
+.saved-toast.show { display: block; }
+.info-box {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 5px; padding: 12px 14px; margin-top: 20px;
+  font-size: 0.78em; color: var(--text-dim); line-height: 1.7;
+}
+.info-box strong { color: var(--text); }
+.info-box code {
+  background: var(--bg-input); padding: 1px 5px; border-radius: 3px;
+  font-size: 0.92em; color: var(--signal-cr);
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="logo">↔ 串扰 因素设置</span>
+  <span class="subtitle">Crosstalk Configuration</span>
+  <a class="back-link" href="waveform-generator.html">← 返回信号模拟器</a>
+</div>
+
+<div class="main">
+  <div class="form-card">
+    <div class="card-title">↔ 串扰参数配置</div>
+    <div class="card-desc">独立的串扰源信号 — 来自另一轴的力窜入当前轴测量</div>
+
+    <div class="section-label">▸ 另一轴的串扰源信号</div>
+
+    <div class="form-group">
+      <label>波形类型</label>
+      <div class="input-row">
+        <select id="srcType">
+          <option value="sine">正弦波 (Sine)</option>
+          <option value="square">方波 (Square)</option>
+          <option value="triangle">三角波 (Triangle)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>频率</label>
+      <div class="input-row">
+        <input type="number" id="srcFreq" value="50" step="1" min="0.1" max="50000">
+        <span class="unit">Hz</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>幅值（另一轴受力）</label>
+      <div class="input-row">
+        <input type="number" id="srcAmp" value="100" step="1" min="1" max="1000000">
+        <span class="unit">N</span>
+      </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <div class="section-label">▸ 串扰比例</div>
+
+    <div class="form-group">
+      <label>串扰比</label>
+      <div class="input-row">
+        <input type="number" id="ratio" value="0.5" step="0.01" min="0" max="100">
+        <span class="unit">%</span>
+      </div>
+    </div>
+
+    <div class="preview-box">
+      串扰偏差幅度（峰值）：
+      <div class="eq-error" id="eqErrorDisplay">—</div>
+      <div class="eq-detail" id="eqDetail">—</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-save" id="btnSave">💾 保存并返回</button>
+      <button class="btn-reset" id="btnReset">↺ 恢复默认</button>
+    </div>
+
+    <div class="saved-toast" id="savedToast">✅ 串扰参数已保存！正在返回...</div>
+
+    <div class="info-box">
+      <strong>串扰误差模型</strong><br>
+      在多轴测力系统中，各轴向之间存在串扰（crosstalk）。Fx 方向实际受力时，在 Fz 方向会感应出小信号。<br><br>
+      <strong>当前实现</strong>：独立定义<strong>串扰源信号</strong>（另一轴的力波形），乘以串扰比例后，叠加到当前轴的测量中。<br>
+      <code>串扰偏差 = srcAmp × srcWaveform(t) × (ratio / 100)</code><br><br>
+      • 波形可设为正弦/方波/三角波<br>
+      • 频率与幅值独立配置（模拟另一轴的载荷）<br>
+      • 比例通常为 ±0.2%~2%（取决于传感器设计）<br>
+      • Kistler 9139AA 串扰 ≤ ±1.0%
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const STORAGE_KEY = "piezo_factor_crosstalk";
+
+  const srcType = document.getElementById("srcType");
+  const srcFreq = document.getElementById("srcFreq");
+  const srcAmp = document.getElementById("srcAmp");
+  const ratioInput = document.getElementById("ratio");
+  const eqErrorDisplay = document.getElementById("eqErrorDisplay");
+  const eqDetail = document.getElementById("eqDetail");
+  const btnSave = document.getElementById("btnSave");
+  const btnReset = document.getElementById("btnReset");
+  const savedToast = document.getElementById("savedToast");
+
+  const defaults = { ratio: 0.5, freq: 50, amp: 100, type: 'sine' };
+
+  function getParams() {
+    return {
+      ratio: parseFloat(ratioInput.value) || defaults.ratio,
+      freq: parseFloat(srcFreq.value) || defaults.freq,
+      amp: parseFloat(srcAmp.value) || defaults.amp,
+      type: srcType.value
+    };
+  }
+
+  function updatePreview() {
+    const p = getParams();
+    const devAmp = p.amp * (p.ratio / 100);
+    eqErrorDisplay.textContent = p.amp.toFixed(0) + 'N × ' + p.ratio.toFixed(2) + '% = ±' + devAmp.toFixed(3) + ' N';
+    eqDetail.textContent = '频率 ' + p.freq + ' Hz，波形: ' + p.type;
+  }
+
+  function loadConfig() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const c = JSON.parse(raw);
+        ratioInput.value = c.ratio ?? defaults.ratio;
+        srcFreq.value = c.freq ?? defaults.freq;
+        srcAmp.value = c.amp ?? defaults.amp;
+        srcType.value = c.type ?? defaults.type;
+      } else {
+        ratioInput.value = defaults.ratio; srcFreq.value = defaults.freq;
+        srcAmp.value = defaults.amp; srcType.value = defaults.type;
+      }
+    } catch (e) {
+      ratioInput.value = defaults.ratio; srcFreq.value = defaults.freq;
+      srcAmp.value = defaults.amp; srcType.value = defaults.type;
+    }
+    updatePreview();
+  }
+
+  ratioInput.addEventListener("input", updatePreview);
+  srcFreq.addEventListener("input", updatePreview);
+  srcAmp.addEventListener("input", updatePreview);
+  srcType.addEventListener("change", updatePreview);
+
+  btnSave.addEventListener("click", () => {
+    const p = getParams();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      ratio: p.ratio, freq: p.freq, amp: p.amp, type: p.type
+    }));
+    savedToast.classList.add("show");
+    setTimeout(() => { window.location.href = "waveform-generator.html"; }, 600);
+  });
+
+  btnReset.addEventListener("click", () => {
+    ratioInput.value = defaults.ratio; srcFreq.value = defaults.freq;
+    srcAmp.value = defaults.amp; srcType.value = defaults.type;
+    updatePreview();
+  });
+
+  loadConfig();
+})();
+</script>
+
+</body>
+</html>

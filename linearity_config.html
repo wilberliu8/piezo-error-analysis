@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>线性度设置 — 压电测力系统</title>
+<style>
+:root {
+  --bg: #14161a;
+  --bg-card: #1c1f26;
+  --bg-input: #242730;
+  --border: #2e3139;
+  --text: #d8dce3;
+  --text-dim: #88909e;
+  --accent: #3388cc;
+  --signal-dirty: #e74c3c;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Microsoft YaHei", "Helvetica Neue", sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.header {
+  width: 100%;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.header .logo { font-size: 1.2em; font-weight: 700; color: var(--text); }
+.header .subtitle { font-size: 0.85em; color: var(--text-dim); }
+
+.back-link {
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 0.85em;
+  margin-left: auto;
+  transition: color 0.15s;
+}
+.back-link:hover { color: var(--accent); }
+
+.main {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 20px;
+  width: 100%;
+}
+
+.form-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 28px 32px;
+  width: 440px;
+}
+
+.form-card .card-title {
+  font-size: 1.1em;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.form-card .card-desc {
+  font-size: 0.82em;
+  color: var(--text-dim);
+  margin-bottom: 24px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+.form-group label {
+  display: block;
+  font-size: 0.85em;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+.form-group .input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.form-group input {
+  flex: 1;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-size: 1em;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+.form-group input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.form-group .unit {
+  font-size: 0.85em;
+  color: var(--text-dim);
+  width: 80px;
+  flex-shrink: 0;
+}
+
+.preview-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 12px 14px;
+  margin-bottom: 24px;
+  font-size: 0.82em;
+  color: var(--text-dim);
+}
+.preview-box .eq-error {
+  font-size: 1em;
+  color: var(--signal-dirty);
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.btn-row {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-save {
+  flex: 1;
+  background: var(--accent);
+  border: none;
+  color: #fff;
+  padding: 10px 0;
+  border-radius: 5px;
+  font-size: 0.95em;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.15s;
+}
+.btn-save:hover { opacity: 0.88; }
+
+.btn-reset {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 10px 18px;
+  border-radius: 5px;
+  font-size: 0.85em;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.btn-reset:hover { color: var(--text); border-color: #4a505e; }
+
+.saved-toast {
+  display: none;
+  background: #1a3a1a;
+  border: 1px solid #2d5a2d;
+  color: #6fcf6f;
+  padding: 8px 14px;
+  border-radius: 5px;
+  font-size: 0.82em;
+  margin-top: 12px;
+  text-align: center;
+}
+.saved-toast.show { display: block; }
+
+.info-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 12px 14px;
+  margin-top: 20px;
+  font-size: 0.78em;
+  color: var(--text-dim);
+  line-height: 1.7;
+}
+.info-box strong { color: var(--text); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="logo">📏 线性度 因素设置</span>
+  <span class="subtitle">Linearity Configuration</span>
+  <a class="back-link" href="waveform-generator.html">← 返回信号模拟器</a>
+</div>
+
+<div class="main">
+  <div class="form-card">
+    <div class="card-title">📏 线性度参数配置</div>
+    <div class="card-desc">BFSL线性度误差带 — 在量程内，真实值落在 ±error 范围内</div>
+
+    <div class="form-group">
+      <label>BFSL 线性度</label>
+      <div class="input-row">
+        <input type="number" id="bfsl" value="0.2" step="0.01" min="0">
+        <span class="unit">%FSO</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>满量程 FSO</label>
+      <div class="input-row">
+        <input type="number" id="fso" value="800" step="1" min="1">
+        <span class="unit">N</span>
+      </div>
+    </div>
+
+    <div class="preview-box">
+      最大线性度误差（误差带半宽）：
+      <div class="eq-error" id="eqErrorDisplay">bfsl% × FSO = 1.60 N</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-save" id="btnSave">💾 保存并返回</button>
+      <button class="btn-reset" id="btnReset">↺ 恢复默认</button>
+    </div>
+
+    <div class="saved-toast" id="savedToast">✅ 线性度参数已保存！正在返回...</div>
+
+    <div class="info-box">
+      <strong>线性度误差模型</strong><br>
+      线性度定义为传感器真实输出与BFSL拟合直线之间的最大偏差，占满量程(FSO)的百分比。<br>
+      误差带 = ±(bfsl% × FSO)，是一个绝对值，在量程内处处适用。<br>
+      例如：bfsl=0.2%, FSO=800N → 误差带 = ±1.6N。测100N的力，真值在98.4~101.6N之间。<br>
+      注意：线性度误差是绝对值（N），不随测量力值变小而缩小——这是小量程测量时的主要误差源。
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const STORAGE_KEY = "piezo_factor_linearity";
+
+  const bfslInput = document.getElementById("bfsl");
+  const fsoInput = document.getElementById("fso");
+  const eqErrorDisplay = document.getElementById("eqErrorDisplay");
+  const btnSave = document.getElementById("btnSave");
+  const btnReset = document.getElementById("btnReset");
+  const savedToast = document.getElementById("savedToast");
+
+  // ── Defaults ──
+  const defaults = { bfsl: 0.2, fso: 800 };
+
+  // ── Load saved or use defaults ──
+  function loadConfig() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const cfg = JSON.parse(raw);
+        bfslInput.value = cfg.bfsl ?? defaults.bfsl;
+        fsoInput.value = cfg.fso ?? defaults.fso;
+      } else {
+        bfslInput.value = defaults.bfsl;
+        fsoInput.value = defaults.fso;
+      }
+    } catch (e) {
+      bfslInput.value = defaults.bfsl;
+      fsoInput.value = defaults.fso;
+    }
+    updatePreview();
+  }
+
+  function updatePreview() {
+    const bfsl = parseFloat(bfslInput.value) || 0;
+    const fso = parseFloat(fsoInput.value) || 1;
+    const error = (bfsl / 100) * fso;
+    eqErrorDisplay.textContent = "bfsl% × FSO = " + error.toFixed(2) + " N";
+  }
+
+  bfslInput.addEventListener("input", updatePreview);
+  fsoInput.addEventListener("input", updatePreview);
+
+  // ── Save ──
+  btnSave.addEventListener("click", () => {
+    const bfsl = parseFloat(bfslInput.value) || 0;
+    const fso = parseFloat(fsoInput.value) || 1;
+    const cfg = { bfsl: bfsl, fso: fso };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
+    savedToast.classList.add("show");
+    setTimeout(() => {
+      window.location.href = "waveform-generator.html";
+    }, 600);
+  });
+
+  // ── Reset ──
+  btnReset.addEventListener("click", () => {
+    bfslInput.value = defaults.bfsl;
+    fsoInput.value = defaults.fso;
+    updatePreview();
+  });
+
+  // ── Init ──
+  loadConfig();
+})();
+</script>
+
+</body>
+</html>

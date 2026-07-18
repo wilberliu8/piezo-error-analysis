@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 480" font-family="Arial, sans-serif">
+  
+  <text x="400" y="35" text-anchor="middle" font-size="20" font-weight="bold" fill="#333">电荷放大器等效电路（正确拓扑）</text>
+  
+  <!-- ======= 传感器部分 ======= -->
+  <rect x="30" y="70" width="220" height="260" rx="8" fill="#E8F4FD" stroke="#4A90D9" stroke-width="1.5" stroke-dasharray="6,3"/>
+  <text x="140" y="95" text-anchor="middle" font-size="14" fill="#4A90D9" font-weight="bold">传感器</text>
+  
+  <!-- 电荷源 Q = d×F -->
+  <circle cx="140" cy="150" r="28" fill="#FFF" stroke="#4A90D9" stroke-width="2"/>
+  <text x="140" y="147" text-anchor="middle" font-size="12" fill="#4A90D9">Q</text>
+  <text x="140" y="162" text-anchor="middle" font-size="10" fill="#666">d×F</text>
+  
+  <!-- 传感器电容 Cp -->
+  <g transform="translate(140, 220)">
+    <line x1="-18" y1="0" x2="18" y2="0" stroke="#4A90D9" stroke-width="2"/>
+    <line x1="-10" y1="-7" x2="-10" y2="7" stroke="#4A90D9" stroke-width="2"/>
+    <line x1="10" y1="-7" x2="10" y2="7" stroke="#4A90D9" stroke-width="2"/>
+  </g>
+  <text x="140" y="242" text-anchor="middle" font-size="11" fill="#4A90D9">Cₚ</text>
+  
+  <!-- 传感器漏电阻 Rp -->
+  <rect x="115" y="270" width="50" height="20" rx="3" fill="#FFF" stroke="#4A90D9" stroke-width="1.5"/>
+  <text x="140" y="283" text-anchor="middle" font-size="10" fill="#4A90D9">Rₚ</text>
+  
+  <!-- 传感器输出线 -->
+  <line x1="250" y1="160" x2="320" y2="160" stroke="#333" stroke-width="2"/>
+  <line x1="250" y1="285" x2="320" y2="285" stroke="#333" stroke-width="1.5"/>
+  
+  <!-- ======= 运放 ======= -->
+  <polygon points="370,120 370,240 460,180" fill="#FFF" stroke="#D0021B" stroke-width="2.5"/>
+  <text x="395" y="188" text-anchor="middle" font-size="16" fill="#D0021B" font-weight="bold">-</text>
+  <text x="445" y="188" text-anchor="middle" font-size="13" fill="#D0021B" font-weight="bold">A</text>
+  
+  <!-- 运放 + 端接地 -->
+  <line x1="415" y1="240" x2="415" y2="310" stroke="#333" stroke-width="1.5"/>
+  <line x1="395" y1="310" x2="435" y2="310" stroke="#333" stroke-width="2.5"/>
+  <line x1="400" y1="316" x2="430" y2="316" stroke="#333" stroke-width="2.5"/>
+  <line x1="405" y1="322" x2="425" y2="322" stroke="#333" stroke-width="2.5"/>
+  <text x="390" y="340" text-anchor="end" font-size="12" fill="#999">GND</text>
+  
+  <!-- ======= 反馈回路：Rf 和 Cf 并联 ======= -->
+  <!-- 从输出到反馈的连线 -->
+  <line x1="460" y1="180" x2="530" y2="180" stroke="#D0021B" stroke-width="2"/>
+  
+  <!-- 反馈电阻 Rf -->
+  <rect x="530" y="148" width="60" height="22" rx="3" fill="#FFF" stroke="#D0021B" stroke-width="2"/>
+  <text x="560" y="162" text-anchor="middle" font-size="13" fill="#D0021B" font-weight="bold">R</text>
+  <text x="572" y="162" text-anchor="start" font-size="13" fill="#D0021B">f</text>
+  
+  <!-- 反馈电容 Cf -->
+  <g transform="translate(560, 210)">
+    <line x1="-16" y1="0" x2="16" y2="0" stroke="#D0021B" stroke-width="2"/>
+    <line x1="-9" y1="-8" x2="-9" y2="8" stroke="#D0021B" stroke-width="2"/>
+    <line x1="9" y1="-8" x2="9" y2="8" stroke="#D0021B" stroke-width="2"/>
+  </g>
+  <text x="560" y="236" text-anchor="middle" font-size="13" fill="#D0021B" font-weight="bold">C</text>
+  <text x="572" y="236" text-anchor="start" font-size="13" fill="#D0021B">f</text>
+  
+  <!-- Rf 上端连接到 Cf 上端 -->
+  <line x1="560" y1="148" x2="560" y2="194" stroke="#D0021B" stroke-width="2"/>
+  <!-- Rf 下端连接到 Cf 下端 -->
+  <line x1="560" y1="170" x2="560" y2="202" stroke="#D0021B" stroke-width="2"/>
+  
+  <!-- 从反馈到输入的回线 -->
+  <line x1="530" y1="158" x2="370" y2="158" stroke="#D0021B" stroke-width="2"/>
+  
+  <!-- 并联标注 -->
+  <text x="590" y="185" text-anchor="start" font-size="11" fill="#D0021B" font-weight="bold">Rf ∥ Cf 并联</text>
+  
+  <!-- ======= 输出 ======= -->
+  <line x1="460" y1="180" x2="700" y2="180" stroke="#333" stroke-width="2.5"/>
+  <polygon points="700,170 720,180 700,190" fill="#333"/>
+  <text x="650" y="210" text-anchor="middle" font-size="15" font-weight="bold" fill="#333">Vout</text>
+  <text x="650" y="228" text-anchor="middle" font-size="12" fill="#666">= -Q总 / Cf</text>
+  
+  <!-- ======= 偏置电流 Ib 标注 ======= -->
+  <line x1="370" y1="180" x2="350" y2="205" stroke="#D0021B" stroke-width="2" marker-end="url(#arrowRed)"/>
+  <text x="345" y="218" text-anchor="end" font-size="14" fill="#D0021B" font-weight="bold">Ib</text>
+  <text x="320" y="232" text-anchor="end" font-size="10" fill="#D0021B">（偏置电流）</text>
+  
+  <defs>
+    <marker id="arrowRed" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+      <polygon points="0,0 8,3 0,6" fill="#D0021B"/>
+    </marker>
+  </defs>
+  
+  <!-- ======= 底部说明 ======= -->
+  <rect x="25" y="370" width="750" height="90" rx="6" fill="#FAFAFA" stroke="#DDD" stroke-width="1"/>
+  <text x="45" y="395" font-size="13" font-weight="bold" fill="#333">回路说明：</text>
+  
+  <text x="45" y="418" font-size="12" fill="#555">① Rf（时间常数电阻）和 Cf（量程电容）在反馈回路中</text>
+  <text x="45" y="438" font-size="12" fill="#D0021B">② 偏置电流 Ib 从运放输入脚流出，经过 Rf 或堆积在 Cf 上</text>
+  <text x="45" y="458" font-size="12" fill="#555">③ Ib 堆积在 Cf 上 → Vout 随时间漂移 | τ = Rf × Cf → f_c = 1/(2πRfCf)</text>
+
+</svg>

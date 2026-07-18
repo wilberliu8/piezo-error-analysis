@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>漂移设置 — 压电测力系统</title>
+<style>
+:root {
+  --bg: #14161a;
+  --bg-card: #1c1f26;
+  --bg-input: #242730;
+  --border: #2e3139;
+  --text: #d8dce3;
+  --text-dim: #88909e;
+  --accent: #3388cc;
+  --signal-clean: #4a9fe0;
+  --signal-dirty: #e0a830;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Microsoft YaHei", "Helvetica Neue", sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.header {
+  width: 100%;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.header .logo { font-size: 1.2em; font-weight: 700; color: var(--text); }
+.header .subtitle { font-size: 0.85em; color: var(--text-dim); }
+
+.back-link {
+  color: var(--text-dim);
+  text-decoration: none;
+  font-size: 0.85em;
+  margin-left: auto;
+  transition: color 0.15s;
+}
+.back-link:hover { color: var(--accent); }
+
+.main {
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 40px 20px;
+  width: 100%;
+}
+
+.form-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 28px 32px;
+  width: 440px;
+}
+
+.form-card .card-title {
+  font-size: 1.1em;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.form-card .card-desc {
+  font-size: 0.82em;
+  color: var(--text-dim);
+  margin-bottom: 24px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+.form-group label {
+  display: block;
+  font-size: 0.85em;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+.form-group .input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.form-group input {
+  flex: 1;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-size: 1em;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+.form-group input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.form-group .unit {
+  font-size: 0.85em;
+  color: var(--text-dim);
+  width: 50px;
+  flex-shrink: 0;
+}
+
+.preview-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 12px 14px;
+  margin-bottom: 24px;
+  font-size: 0.82em;
+  color: var(--text-dim);
+}
+.preview-box .eq-drift {
+  font-size: 1em;
+  color: var(--signal-dirty);
+  font-weight: 600;
+  margin-top: 4px;
+}
+
+.btn-row {
+  display: flex;
+  gap: 10px;
+}
+
+.btn-save {
+  flex: 1;
+  background: var(--accent);
+  border: none;
+  color: #fff;
+  padding: 10px 0;
+  border-radius: 5px;
+  font-size: 0.95em;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.15s;
+}
+.btn-save:hover { opacity: 0.88; }
+
+.btn-reset {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 10px 18px;
+  border-radius: 5px;
+  font-size: 0.85em;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.15s;
+}
+.btn-reset:hover { color: var(--text); border-color: #4a505e; }
+
+.saved-toast {
+  display: none;
+  background: #1a3a1a;
+  border: 1px solid #2d5a2d;
+  color: #6fcf6f;
+  padding: 8px 14px;
+  border-radius: 5px;
+  font-size: 0.82em;
+  margin-top: 12px;
+  text-align: center;
+}
+.saved-toast.show { display: block; }
+
+.info-box {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 12px 14px;
+  margin-top: 20px;
+  font-size: 0.78em;
+  color: var(--text-dim);
+  line-height: 1.7;
+}
+.info-box strong { color: var(--text); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="logo">⏳ 漂移 因素设置</span>
+  <span class="subtitle">Drift Configuration</span>
+  <a class="back-link" href="waveform-generator.html">← 返回信号模拟器</a>
+</div>
+
+<div class="main">
+  <div class="form-card">
+    <div class="card-title">⏳ 漂移参数配置</div>
+    <div class="card-desc">电荷放大器零漂等效输入力 · 随时间线性增长</div>
+
+    <div class="form-group">
+      <label>系统漂移率</label>
+      <div class="input-row">
+        <input type="number" id="rate" value="0.05" step="0.01" min="0">
+        <span class="unit">pC/s</span>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>传感器灵敏度</label>
+      <div class="input-row">
+        <input type="number" id="sensitivity" value="4.1" step="0.1" min="0.01">
+        <span class="unit">pC/N</span>
+      </div>
+    </div>
+
+    <div class="preview-box">
+      等效输入力漂移率：
+      <div class="eq-drift" id="eqDriftDisplay">rate / sensitivity = 0.0122 N/s</div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-save" id="btnSave">💾 保存并返回</button>
+      <button class="btn-reset" id="btnReset">↺ 恢复默认</button>
+    </div>
+
+    <div class="saved-toast" id="savedToast">✅ 漂移参数已保存！正在返回...</div>
+
+    <div class="info-box">
+      <strong>漂移模型</strong><br>
+      漂移来自电荷放大器的偏置电流和电荷泄露，表现为输出信号的缓慢线性漂移。<br>
+      等效输入力漂移率 = 漂移率 ÷ 灵敏度，单位 N/s。<br>
+      总漂移力 D(t) = 漂移率 / 灵敏度 × t，随时间线性增长。
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const STORAGE_KEY = "piezo_factor_drift";
+
+  const rateInput = document.getElementById("rate");
+  const sensitivityInput = document.getElementById("sensitivity");
+  const eqDriftDisplay = document.getElementById("eqDriftDisplay");
+  const btnSave = document.getElementById("btnSave");
+  const btnReset = document.getElementById("btnReset");
+  const savedToast = document.getElementById("savedToast");
+
+  // ── Defaults ──
+  const defaults = { rate: 0.05, sensitivity: 4.1 };
+
+  // ── Load saved or use defaults ──
+  function loadConfig() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const cfg = JSON.parse(raw);
+        rateInput.value = cfg.rate ?? defaults.rate;
+        sensitivityInput.value = cfg.sensitivity ?? defaults.sensitivity;
+      } else {
+        rateInput.value = defaults.rate;
+        sensitivityInput.value = defaults.sensitivity;
+      }
+    } catch (e) {
+      rateInput.value = defaults.rate;
+      sensitivityInput.value = defaults.sensitivity;
+    }
+    updatePreview();
+  }
+
+  function updatePreview() {
+    const rate = parseFloat(rateInput.value) || 0;
+    const sens = parseFloat(sensitivityInput.value) || 1;
+    const eqDrift = rate / sens;
+    eqDriftDisplay.textContent = "rate / sensitivity = " + eqDrift.toFixed(4) + " N/s";
+  }
+
+  rateInput.addEventListener("input", updatePreview);
+  sensitivityInput.addEventListener("input", updatePreview);
+
+  // ── Save ──
+  btnSave.addEventListener("click", () => {
+    const rate = parseFloat(rateInput.value) || 0;
+    const sens = parseFloat(sensitivityInput.value) || 1;
+    const cfg = { rate: rate, sensitivity: sens };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cfg));
+    savedToast.classList.add("show");
+    setTimeout(() => {
+      window.location.href = "waveform-generator.html";
+    }, 600);
+  });
+
+  // ── Reset ──
+  btnReset.addEventListener("click", () => {
+    rateInput.value = defaults.rate;
+    sensitivityInput.value = defaults.sensitivity;
+    updatePreview();
+  });
+
+  // ── Init ──
+  loadConfig();
+})();
+</script>
+
+</body>
+</html>

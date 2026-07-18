@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>噪声设置 — 压电测力系统</title>
+<style>
+:root {
+  --bg: #14161a; --bg-card: #1c1f26; --bg-input: #242730;
+  --border: #2e3139; --text: #d8dce3; --text-dim: #88909e;
+  --accent: #3388cc; --signal-noise: #2ecc71; --warn: #d29922;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Microsoft YaHei", "Helvetica Neue", sans-serif;
+  font-size: 14px; line-height: 1.5;
+  min-height: 100vh; display: flex; flex-direction: column;
+}
+.header {
+  width: 100%; background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 24px; display: flex; align-items: center; gap: 14px;
+  flex-shrink: 0;
+}
+.header .logo { font-size: 1.2em; font-weight: 700; color: var(--text); }
+.header .subtitle { font-size: 0.85em; color: var(--text-dim); }
+.back-link {
+  color: var(--text-dim); text-decoration: none; font-size: 0.85em;
+  margin-left: auto; transition: color 0.15s;
+}
+.back-link:hover { color: var(--accent); }
+.main { flex: 1; display: flex; padding: 40px 20px; justify-content: center; }
+.form-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 8px; padding: 28px 32px; width: 450px;
+}
+.form-card .card-title { font-size: 1.1em; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.form-card .card-desc { font-size: 0.82em; color: var(--text-dim); margin-bottom: 24px; }
+.section-label {
+  font-size: 0.78em; color: var(--text-dim);
+  text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px;
+}
+.form-group { margin-bottom: 14px; }
+.form-group label { display: block; font-size: 0.85em; color: var(--text-dim); margin-bottom: 4px; }
+.form-group .input-row { display: flex; align-items: center; gap: 6px; }
+.form-group input {
+  flex: 1; background: var(--bg-input); border: 1px solid var(--border);
+  color: var(--text); padding: 7px 10px; border-radius: 4px;
+  font-size: 0.95em; font-family: inherit;
+  transition: border-color 0.15s;
+}
+.form-group input:focus { outline: none; border-color: var(--accent); }
+.form-group input:disabled { opacity: 0.4; cursor: not-allowed; }
+.form-group .unit { font-size: 0.85em; color: var(--text-dim); width: 50px; flex-shrink: 0; text-align: center; }
+.section-divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+.toggle-row {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 12px;
+}
+.toggle-row input[type="checkbox"] {
+  accent-color: var(--signal-noise); width: 13px; height: 13px; margin: 0; cursor: pointer;
+}
+.toggle-row label { font-size: 0.9em; color: var(--text); cursor: pointer; font-weight: 600; }
+.toggle-row .hint { font-size: 0.78em; color: var(--text-dim); margin-left: 4px; }
+
+.sub-params { margin-left: 20px; display: none; }
+.sub-params.active { display: block; }
+
+.preview-box {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 5px; padding: 12px 14px; margin-bottom: 24px;
+  font-size: 0.82em; color: var(--text-dim); line-height: 1.8;
+}
+.preview-box .val { color: var(--signal-noise); font-weight: 600; }
+.preview-box .val-warn { color: var(--warn); font-weight: 600; }
+.preview-box .off { color: var(--text-dim); opacity: 0.5; }
+
+.btn-row { display: flex; gap: 10px; }
+.btn-save {
+  flex: 1; background: var(--accent); border: none; color: #fff;
+  padding: 10px 0; border-radius: 5px; font-size: 0.95em; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: opacity 0.15s;
+}
+.btn-save:hover { opacity: 0.88; }
+.btn-reset {
+  background: var(--bg-input); border: 1px solid var(--border);
+  color: var(--text-dim); padding: 10px 18px; border-radius: 5px;
+  font-size: 0.85em; cursor: pointer; font-family: inherit;
+  transition: all 0.15s;
+}
+.btn-reset:hover { color: var(--text); border-color: #4a505e; }
+.saved-toast {
+  display: none; background: #1a3a1a; border: 1px solid #2d5a2d;
+  color: #6fcf6f; padding: 8px 14px; border-radius: 5px;
+  font-size: 0.82em; margin-top: 12px; text-align: center;
+}
+.saved-toast.show { display: block; }
+.info-box {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 5px; padding: 12px 14px; margin-top: 20px;
+  font-size: 0.78em; color: var(--text-dim); line-height: 1.7;
+}
+.info-box strong { color: var(--text); }
+.info-box code {
+  background: var(--bg-input); padding: 1px 5px; border-radius: 3px;
+  font-size: 0.92em; color: var(--signal-noise);
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="logo">🌊 噪声 因素设置</span>
+  <span class="subtitle">Environmental Noise Configuration</span>
+  <a class="back-link" href="waveform-generator.html">← 返回信号模拟器</a>
+</div>
+
+<div class="main">
+  <div class="form-card">
+    <div class="card-title">🌊 噪声参数配置</div>
+    <div class="card-desc">电噪声直接叠加(N) + 振动加速度(g) × 等效质量 → 噪声力(N)</div>
+
+    <!-- ── 电噪声底 ── -->
+    <div class="section-label">▸ 电噪声（始终开启，直接叠加到力信号）</div>
+    <div class="form-group">
+      <label>噪声幅值</label>
+      <div class="input-row">
+        <input type="number" id="noiseFloor" value="0.02" step="0.001" min="0">
+        <span class="unit">N</span>
+      </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- ── 等效质量 ── -->
+    <div class="section-label">▸ 振动→力折算</div>
+    <div class="form-group">
+      <label>传感器等效质量</label>
+      <div class="input-row">
+        <input type="number" id="meq" value="2" step="0.1" min="0.01">
+        <span class="unit">kg</span>
+      </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- ── 建筑低频振动 ── -->
+    <div class="section-label">▸ 地基 / 建筑低频振动</div>
+    <div class="toggle-row">
+      <input type="checkbox" id="cbBuilding" checked>
+      <label for="cbBuilding">启用</label>
+      <span class="hint">（0.1~5 Hz）</span>
+    </div>
+    <div class="sub-params active" id="buildingParams">
+      <div class="form-group">
+        <label>频率</label>
+        <div class="input-row">
+          <input type="number" id="buildingFreq" value="2.5" step="0.1" min="0.1" max="50">
+          <span class="unit">Hz</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>幅值</label>
+        <div class="input-row">
+          <input type="number" id="buildingAmp" value="0.005" step="0.0001" min="0">
+          <span class="unit">g</span>
+        </div>
+      </div>
+    </div>
+
+    <hr class="section-divider">
+
+    <!-- ── 旋转机械振动 ── -->
+    <div class="section-label">▸ 周边旋转机械振动</div>
+    <div class="toggle-row">
+      <input type="checkbox" id="cbMachine">
+      <label for="cbMachine">启用</label>
+      <span class="hint">（电机/泵/压缩机等）</span>
+    </div>
+    <div class="sub-params" id="machineParams">
+      <div class="form-group">
+        <label>频率（= 转速 × 极对数）</label>
+        <div class="input-row">
+          <input type="number" id="machineFreq" value="50" step="0.1" min="0.1" max="5000">
+          <span class="unit">Hz</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>幅值</label>
+        <div class="input-row">
+          <input type="number" id="machineAmp" value="0.002" step="0.0001" min="0">
+          <span class="unit">g</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── 实时预览 ── -->
+    <div class="preview-box">
+      <span>电噪声: <span class="val" id="previewFloor">—</span></span><br>
+      <span id="previewBuilding">低频振动: <span class="val-warn">—</span></span><br>
+      <span id="previewMachine">机械振动: <span class="val-warn">—</span></span>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-save" id="btnSave">💾 保存并返回</button>
+      <button class="btn-reset" id="btnReset">↺ 恢复默认</button>
+    </div>
+
+    <div class="saved-toast" id="savedToast">✅ 噪声参数已保存！正在返回...</div>
+
+    <div class="info-box">
+      <strong>噪声模型（三层叠加）</strong><br><br>
+      <strong>① 电噪声</strong> — 传感器+电路噪声，直接以力(N)叠加，时域为伪随机抖动。<br><br>
+      <strong>② 建筑低频振动</strong>（可选）— 地基/建筑物低频响应 (0.1~5Hz)，加速度(g)经 meq 折算为力。<br><br>
+      <strong>③ 旋转机械振动</strong>（可选）— 周边电机/泵等，加速度(g)经 meq 折算为力。<br><br>
+      <code>噪声力(N) = 随机(±noiseFloor) + 建筑幅值(g)×meq×9.81 + 机械幅值(g)×meq×9.81</code>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const STORAGE_KEY = "piezo_factor_envnoise";
+
+  const noiseFloor = document.getElementById("noiseFloor");
+  const meqInput = document.getElementById("meq");
+  const cbBuilding = document.getElementById("cbBuilding");
+  const buildingFreq = document.getElementById("buildingFreq");
+  const buildingAmp = document.getElementById("buildingAmp");
+  const buildingParams = document.getElementById("buildingParams");
+  const cbMachine = document.getElementById("cbMachine");
+  const machineFreq = document.getElementById("machineFreq");
+  const machineAmp = document.getElementById("machineAmp");
+  const machineParams = document.getElementById("machineParams");
+
+  const previewFloor = document.getElementById("previewFloor");
+  const previewBuilding = document.getElementById("previewBuilding");
+  const previewMachine = document.getElementById("previewMachine");
+
+  const btnSave = document.getElementById("btnSave");
+  const btnReset = document.getElementById("btnReset");
+  const savedToast = document.getElementById("savedToast");
+
+  const defaults = { meq: 2, noiseFloor: 0.02, buildingFreq: 2.5, buildingAmp: 0.005, machineFreq: 50, machineAmp: 0.002 };
+
+  function getParams() {
+    return {
+      meq: parseFloat(meqInput.value) || 0,
+      noiseFloor: parseFloat(noiseFloor.value) || 0,
+      buildingFreq: cbBuilding.checked ? (parseFloat(buildingFreq.value) || defaults.buildingFreq) : 0,
+      buildingAmp: parseFloat(buildingAmp.value) || 0,
+      machineFreq: cbMachine.checked ? (parseFloat(machineFreq.value) || defaults.machineFreq) : 0,
+      machineAmp: parseFloat(machineAmp.value) || 0
+    };
+  }
+
+  function updatePreview() {
+    const nf = parseFloat(noiseFloor.value) || 0;
+    const meq = parseFloat(meqInput.value) || 0;
+    previewFloor.textContent = '±' + nf.toFixed(3) + ' N';
+
+    if (cbBuilding.checked) {
+      const bf = parseFloat(buildingFreq.value) || defaults.buildingFreq;
+      const ba = parseFloat(buildingAmp.value) || 0;
+      const forceN = ba * meq * 9.81;
+      previewBuilding.innerHTML = '低频振动: <span class="val-warn">' + bf.toFixed(1)
+        + ' Hz, ±' + ba.toFixed(4) + ' g → ±' + forceN.toFixed(3) + ' N</span>';
+    } else {
+      previewBuilding.innerHTML = '低频振动: <span class="off">已关闭</span>';
+    }
+
+    if (cbMachine.checked) {
+      const mf = parseFloat(machineFreq.value) || defaults.machineFreq;
+      const ma = parseFloat(machineAmp.value) || 0;
+      const forceN = ma * meq * 9.81;
+      previewMachine.innerHTML = '机械振动: <span class="val-warn">' + mf.toFixed(1)
+        + ' Hz, ±' + ma.toFixed(4) + ' g → ±' + forceN.toFixed(3) + ' N</span>';
+    } else {
+      previewMachine.innerHTML = '机械振动: <span class="off">已关闭</span>';
+    }
+  }
+
+  function loadConfig() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const c = JSON.parse(raw);
+        meqInput.value = c.meq ?? defaults.meq;
+        noiseFloor.value = c.noiseFloor ?? defaults.noiseFloor;
+        const bOn = (c.buildingFreq ?? defaults.buildingFreq) > 0;
+        cbBuilding.checked = bOn;
+        buildingFreq.value = bOn ? c.buildingFreq : defaults.buildingFreq;
+        buildingAmp.value = c.buildingAmp ?? defaults.buildingAmp;
+        buildingParams.classList.toggle('active', bOn);
+        const mOn = (c.machineFreq ?? 0) > 0;
+        cbMachine.checked = mOn;
+        machineFreq.value = mOn ? c.machineFreq : defaults.machineFreq;
+        machineAmp.value = c.machineAmp ?? defaults.machineAmp;
+        machineParams.classList.toggle('active', mOn);
+      } else {
+        meqInput.value = defaults.meq; noiseFloor.value = defaults.noiseFloor;
+        cbBuilding.checked = true; buildingFreq.value = defaults.buildingFreq; buildingAmp.value = defaults.buildingAmp;
+        buildingParams.classList.add('active');
+        cbMachine.checked = false; machineFreq.value = defaults.machineFreq; machineAmp.value = defaults.machineAmp;
+        machineParams.classList.remove('active');
+      }
+    } catch (e) {
+      meqInput.value = defaults.meq; noiseFloor.value = defaults.noiseFloor;
+      cbBuilding.checked = true; cbMachine.checked = false;
+      buildingFreq.value = defaults.buildingFreq; buildingAmp.value = defaults.buildingAmp;
+      machineFreq.value = defaults.machineFreq; machineAmp.value = defaults.machineAmp;
+      buildingParams.classList.add('active'); machineParams.classList.remove('active');
+    }
+    updatePreview();
+  }
+
+  cbBuilding.addEventListener('change', () => { buildingParams.classList.toggle('active', cbBuilding.checked); updatePreview(); });
+  cbMachine.addEventListener('change', () => { machineParams.classList.toggle('active', cbMachine.checked); updatePreview(); });
+  noiseFloor.addEventListener('input', updatePreview);
+  meqInput.addEventListener('input', updatePreview);
+  buildingFreq.addEventListener('input', updatePreview);
+  buildingAmp.addEventListener('input', updatePreview);
+  machineFreq.addEventListener('input', updatePreview);
+  machineAmp.addEventListener('input', updatePreview);
+
+  btnSave.addEventListener('click', () => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(getParams()));
+    savedToast.classList.add('show');
+    setTimeout(() => { window.location.href = "waveform-generator.html"; }, 600);
+  });
+
+  btnReset.addEventListener('click', () => {
+    meqInput.value = defaults.meq; noiseFloor.value = defaults.noiseFloor;
+    cbBuilding.checked = true; buildingFreq.value = defaults.buildingFreq; buildingAmp.value = defaults.buildingAmp;
+    cbMachine.checked = false; machineFreq.value = defaults.machineFreq; machineAmp.value = defaults.machineAmp;
+    buildingParams.classList.add('active'); machineParams.classList.remove('active');
+    updatePreview();
+  });
+
+  loadConfig();
+})();
+</script>
+
+</body>
+</html>

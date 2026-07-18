@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>频响设置 — 压电测力系统</title>
+<style>
+:root {
+  --bg: #14161a; --bg-card: #1c1f26; --bg-input: #242730;
+  --border: #2e3139; --text: #d8dce3; --text-dim: #88909e;
+  --accent: #3388cc; --signal-fr: #9b59b6; --warn: #d29922; --green: #3fb950;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Microsoft YaHei", "Helvetica Neue", sans-serif;
+  font-size: 14px; line-height: 1.5;
+  min-height: 100vh; display: flex; flex-direction: column;
+}
+.header {
+  width: 100%; background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 24px; display: flex; align-items: center; gap: 14px;
+  flex-shrink: 0;
+}
+.header .logo { font-size: 1.2em; font-weight: 700; color: var(--text); }
+.header .subtitle { font-size: 0.85em; color: var(--text-dim); }
+.back-link {
+  color: var(--text-dim); text-decoration: none; font-size: 0.85em;
+  margin-left: auto; transition: color 0.15s;
+}
+.back-link:hover { color: var(--accent); }
+
+.main {
+  flex: 1; display: flex; padding: 16px 20px; gap: 16px;
+  min-height: 0;
+}
+
+/* ── Left panel ── */
+.left-panel {
+  width: 340px; flex-shrink: 0;
+  display: flex; flex-direction: column; gap: 14px;
+}
+.param-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 8px; padding: 18px 20px;
+}
+.param-card .card-title {
+  font-size: 0.85em; font-weight: 700; color: var(--text-dim);
+  text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 14px;
+}
+.form-group { margin-bottom: 14px; }
+.form-group:last-child { margin-bottom: 0; }
+.form-group label {
+  display: block; font-size: 0.82em; color: var(--text-dim); margin-bottom: 4px;
+}
+.form-group .input-row { display: flex; align-items: center; gap: 6px; }
+.form-group input[type=number] {
+  flex: 1; background: var(--bg-input); border: 1px solid var(--border);
+  color: var(--text); padding: 7px 10px; border-radius: 4px;
+  font-size: 0.95em; font-family: inherit; min-width: 0;
+  transition: border-color 0.15s;
+}
+.form-group input[type=number]:focus { outline: none; border-color: var(--accent); }
+.form-group .unit-text {
+  font-size: 0.8em; color: var(--text-dim); width: 38px; flex-shrink: 0; text-align: center;
+}
+.form-group select.unit-switch {
+  background: var(--bg-input); border: 1px solid var(--border);
+  color: var(--text); padding: 6px 4px; border-radius: 4px;
+  font-size: 0.82em; font-family: inherit; cursor: pointer; width: 52px;
+  flex-shrink: 0; transition: border-color 0.15s;
+}
+.form-group select.unit-switch:focus { outline: none; border-color: var(--accent); }
+
+.btn-row { display: flex; gap: 8px; }
+.btn-save {
+  flex: 1; background: var(--accent); border: none; color: #fff;
+  padding: 9px 0; border-radius: 5px; font-size: 0.9em; font-weight: 600;
+  cursor: pointer; font-family: inherit; transition: opacity 0.15s;
+}
+.btn-save:hover { opacity: 0.88; }
+.btn-reset {
+  background: var(--bg-input); border: 1px solid var(--border);
+  color: var(--text-dim); padding: 9px 14px; border-radius: 5px;
+  font-size: 0.82em; cursor: pointer; font-family: inherit;
+  transition: all 0.15s;
+}
+.btn-reset:hover { color: var(--text); border-color: #4a505e; }
+.saved-toast {
+  display: none; background: #1a3a1a; border: 1px solid #2d5a2d;
+  color: #6fcf6f; padding: 7px 12px; border-radius: 5px;
+  font-size: 0.78em; margin-top: 10px; text-align: center;
+}
+.saved-toast.show { display: block; }
+
+/* ── Right panel ── */
+.right-panel {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.chart-card {
+  flex: 1; min-height: 0;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 8px; padding: 14px;
+  display: flex; flex-direction: column;
+}
+.chart-card .chart-title {
+  font-size: 0.85em; color: var(--text-dim); margin-bottom: 8px;
+  flex-shrink: 0;
+}
+.chart-card canvas {
+  flex: 1; display: block; width: 100%; min-height: 0;
+}
+.chart-card .chart-subtitle {
+  font-size: 0.72em; color: var(--text-dim); margin-top: 4px; text-align: center;
+  flex-shrink: 0;
+}
+
+.data-row {
+  display: flex; gap: 12px; flex-shrink: 0;
+}
+.data-card {
+  flex: 1;
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: 8px; padding: 12px 14px;
+}
+.data-card .dt-title {
+  font-size: 0.78em; color: var(--text-dim); margin-bottom: 6px;
+}
+.data-card table { width: 100%; border-collapse: collapse; font-size: 0.78em; }
+.data-card td { padding: 3px 6px; text-align: center; border: 1px solid var(--border); }
+.data-card td:first-child { color: var(--text-dim); text-align: left; }
+.data-card td.hl5 { color: var(--green); font-weight: 600; }
+.data-card td.hl10 { color: var(--warn); font-weight: 600; }
+.data-card td.hl3db { color: var(--signal-fr); font-weight: 600; }
+
+.spec-list { font-size: 0.78em; color: var(--text-dim); line-height: 1.8; }
+.spec-list .sl-row { display: flex; justify-content: space-between; padding: 1px 0; }
+.spec-list .sl-val { color: var(--text); font-weight: 600; }
+.spec-list .sl-val.warn { color: var(--warn); }
+.spec-list .sl-val.good { color: var(--green); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <span class="logo">📶 频响 因素设置</span>
+  <span class="subtitle">Frequency Response Configuration</span>
+  <a class="back-link" href="waveform-generator.html">← 返回信号模拟器</a>
+</div>
+
+<div class="main">
+
+  <!-- ── LEFT ── -->
+  <div class="left-panel">
+    <div class="param-card">
+      <div class="card-title">▸ 传感器特性</div>
+      <div class="form-group">
+        <label>谐振频率 f<sub>n</sub></label>
+        <div class="input-row">
+          <input type="number" id="fn" value="30" step="0.5" min="0.1" max="200">
+          <select class="unit-switch" id="fnUnit">
+            <option value="kHz">kHz</option>
+            <option value="Hz">Hz</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>阻尼比 ζ</label>
+        <div class="input-row">
+          <input type="number" id="zeta" value="0.002" step="0.001" min="0.0005" max="0.100">
+          <span class="unit-text">—</span>
+        </div>
+      </div>
+      <div style="font-size:0.72em;color:var(--text-dim);margin-top:-6px;">
+        裸传感器典型值 ≈0.002 (Q≈250) ｜ 加载系统 0.01~0.03
+      </div>
+    </div>
+
+    <div class="param-card">
+      <div class="card-title">▸ 安装条件</div>
+      <div class="form-group">
+        <label>传感器等效质量 m<sub>s</sub></label>
+        <div class="input-row">
+          <input type="number" id="ms" value="50" step="1" min="0.1" max="10000">
+          <select class="unit-switch" id="msUnit">
+            <option value="g">g</option>
+            <option value="kg">kg</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>附加质量 M（夹具+被测物）</label>
+        <div class="input-row">
+          <input type="number" id="M" value="500" step="10" min="0" max="50000">
+          <select class="unit-switch" id="MUnit">
+            <option value="g">g</option>
+            <option value="kg">kg</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ 系统频响特性 — 典型结果 ═══ -->
+    <div class="data-card" style="flex:0 0 auto;padding:14px 20px;">
+      <div class="dt-title">📋 系统频响特性（典型结果）</div>
+      <div class="spec-list">
+        <div class="sl-row"><span>原始 f<sub>n</sub></span><span class="sl-val" id="fnOrigDisplay">—</span></div>
+        <div class="sl-row"><span>系统 f<sub>n</sub>'</span><span class="sl-val" id="fnPrimeDisplay">—</span></div>
+        <div class="sl-row"><span>偏移 Δf</span><span class="sl-val warn" id="fnDeltaDisplay">—</span></div>
+        <div class="sl-row"><span>谐振峰放大</span><span class="sl-val" id="peakGainDisplay">—</span></div>
+        <div class="sl-row"><span>建议上限 &lt;10%</span><span class="sl-val good" id="safeFreqDisplay">—</span></div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn-save" id="btnSave">💾 保存并返回</button>
+      <button class="btn-reset" id="btnReset">↺ 重置</button>
+    </div>
+    <div class="saved-toast" id="savedToast">✅ 频响参数已保存！正在返回...</div>
+  </div>
+
+  <!-- ── RIGHT ── -->
+  <div class="right-panel">
+    <div class="chart-card">
+      <div class="chart-title">📊 幅频响应对比 — 纵轴 |H| 对数，横轴频率 kHz（线性）</div>
+      <canvas id="freqRespCanvas"></canvas>
+      <div class="chart-subtitle">虚线 = 原始 (M=0) ｜ 实线 = 当前 ｜ 圆点 = 经验误差参考点</div>
+    </div>
+
+    <!-- Empirical error reference — natural height only -->
+    <div class="data-card" style="flex:0 0 auto;">
+      <div class="dt-title">📊 经验误差参考（传感器 f<sub>n</sub>=<span id="fnDisplayRef">—</span>）</div>
+      <table>
+        <tr><td></td><td style="color:var(--text);font-weight:700;">f<sub>n</sub></td><td class="hl5">0.2 f<sub>n</sub>'</td><td class="hl10">0.3 f<sub>n</sub>'</td><td style="color:#e06c75;font-weight:700;">0.5 f<sub>n</sub>'</td><td style="color:var(--signal-fr);font-weight:700;">f<sub>n</sub>'</td></tr>
+        <tr><td>误差 (dB)</td><td style="color:var(--text);font-weight:600;" id="errFn_d">—</td><td class="hl5" id="errRef02d">—</td><td class="hl10" id="errRef03d">—</td><td style="color:#e06c75;font-weight:600;" id="errRef05d">—</td><td style="color:var(--signal-fr);font-weight:600;" id="errFnP_d">—</td></tr>
+        <tr><td>误差 (%)</td><td style="color:var(--text);font-weight:600;" id="errFn_p">—</td><td class="hl5" id="errRef02p">—</td><td class="hl10" id="errRef03p">—</td><td style="color:#e06c75;font-weight:600;" id="errRef05p">—</td><td style="color:var(--signal-fr);font-weight:600;" id="errFnP_p">—</td></tr>
+        <tr><td>频率</td><td style="color:var(--text);font-weight:600;" id="freqFn">—</td><td id="freqRef02">—</td><td id="freqRef03">—</td><td style="color:var(--text);font-weight:600;" id="freqRef05">—</td><td style="color:var(--text);font-weight:600;" id="freqFnP">—</td></tr>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function () {
+  const STORAGE_KEY = "piezo_factor_freqresp";
+
+  const fnI = document.getElementById("fn");
+  const fnUnitI = document.getElementById("fnUnit");
+  const zetaI = document.getElementById("zeta");
+  const msI = document.getElementById("ms");
+  const msUnitI = document.getElementById("msUnit");
+  const MI = document.getElementById("M");
+  const MUnitI = document.getElementById("MUnit");
+  const canvas = document.getElementById("freqRespCanvas");
+  const ctx = canvas.getContext("2d");
+
+  const fnOrigD = document.getElementById("fnOrigDisplay");
+  const fnPrimeD = document.getElementById("fnPrimeDisplay");
+  const fnDeltaD = document.getElementById("fnDeltaDisplay");
+  const peakGainD = document.getElementById("peakGainDisplay");
+  const safeFreqD = document.getElementById("safeFreqDisplay");
+  const eD = {
+    d: [document.getElementById("errFn_d"), document.getElementById("errRef02d"), document.getElementById("errRef03d"), document.getElementById("errRef05d"), document.getElementById("errFnP_d")],
+    p: [document.getElementById("errFn_p"), document.getElementById("errRef02p"), document.getElementById("errRef03p"), document.getElementById("errRef05p"), document.getElementById("errFnP_p")],
+    f: [document.getElementById("freqFn"), document.getElementById("freqRef02"), document.getElementById("freqRef03"), document.getElementById("freqRef05"), document.getElementById("freqFnP")]
+  };
+
+  const btnSave = document.getElementById("btnSave");
+  const btnReset = document.getElementById("btnReset");
+  const savedToast = document.getElementById("savedToast");
+
+  const defaults = { fn: 30, zeta: 0.002, ms: 0.05, M: 0.50 };
+
+  // ── Unit conversion ──
+  function readKg(id, unitId) {
+    const val = parseFloat(document.getElementById(id).value) || 0;
+    return document.getElementById(unitId).value === 'g' ? val / 1000 : val;
+  }
+  function setValWithUnit(id, unitId, kgVal, defaultUnit) {
+    const unit = document.getElementById(unitId).value;
+    const display = unit === 'g' ? kgVal * 1000 : kgVal;
+    document.getElementById(id).value = display;
+  }
+  function readFnKHz() {
+    const val = parseFloat(fnI.value) || 0;
+    return fnUnitI.value === 'Hz' ? val / 1000 : val;
+  }
+  function setFnKHz(kgVal) {
+    const display = fnUnitI.value === 'Hz' ? kgVal * 1000 : kgVal;
+    fnI.value = display;
+  }
+  function updateFnStep() {
+    if (fnUnitI.value === 'Hz') {
+      fnI.step = 100; fnI.min = 10; fnI.max = 200000;
+    } else {
+      fnI.step = 0.5; fnI.min = 0.1; fnI.max = 200;
+    }
+  }
+
+  function getParams() {
+    return {
+      fn: readFnKHz(),
+      zeta: parseFloat(zetaI.value) || defaults.zeta,
+      ms: readKg('ms', 'msUnit'),
+      M: readKg('M', 'MUnit')
+    };
+  }
+
+  function calcFnPrime(fn, ms, M) {
+    const r = M > 0 ? Math.sqrt(ms / (ms + M)) : 1;
+    return fn * r;
+  }
+
+  function calcPeakGain(z) {
+    return 1 / (2 * z * Math.sqrt(1 - z * z));
+  }
+
+  function calcMag(r, z) {
+    const d = (1 - r * r) * (1 - r * r) + (2 * z * r) * (2 * z * r);
+    return d > 0 ? 1 / Math.sqrt(d) : 1;
+  }
+
+  function toDB(m) { return 20 * Math.log10(m); }
+
+  // ── Draw (auto-scaled log Y: peak→10ⁿ, X: fn×1.5) ──
+
+  function drawCurve() {
+    const p = getParams();
+    const fnPrime = calcFnPrime(p.fn, p.ms, p.M);
+    const fnOrig = p.fn;
+
+    const w = canvas.width, h = canvas.height;
+    if (w <= 0 || h <= 0) return;
+
+    const ML = 56, MR = 10, MT = 16, MB = 26;
+    const cw = w - ML - MR, ch = h - MT - MB;
+    if (cw <= 10 || ch <= 10) return;
+    function xF(f) { return ML + (f / maxFreq) * cw; }
+
+    // ── Compute curves at sufficient range to find peak ──
+    const pts = 400;
+    const scanMax = fnOrig * 3;
+    let maxMag = 1;
+    // First pass: quick scan to find peak (for Y auto-scale)
+    for (let i = 0; i < pts; i++) {
+      const f = (scanMax / pts) * i;
+      const mO = calcMag(fnOrig > 0 ? f / fnOrig : 0, p.zeta);
+      const mS = calcMag(fnPrime > 0 ? f / fnPrime : 0, p.zeta);
+      if (mO > maxMag) maxMag = mO;
+      if (mS > maxMag) maxMag = mS;
+    }
+
+    // ── Y axis: next power of 10 above peak ──
+    const yMax = Math.pow(10, Math.ceil(Math.log10(Math.max(maxMag * 1.1, 1.5))));
+    const yMin = 0.3;
+    const logMin = Math.log10(yMin);
+    const logMax = Math.log10(yMax);
+    const logRange = logMax - logMin;
+    function yM(mag) {
+      return MT + ch - ((Math.log10(Math.max(mag, 0.01)) - logMin) / logRange) * ch;
+    }
+
+    // ── X axis: 1.5× sensor's own resonant frequency ──
+    const maxFreq = Math.max(fnOrig * 1.5, 2);
+
+    // ── Second pass: compute curves at actual display resolution ──
+    const magO = new Float64Array(pts);
+    const magS = new Float64Array(pts);
+    for (let i = 0; i < pts; i++) {
+      const f = (maxFreq / pts) * i;
+      magO[i] = calcMag(fnOrig > 0 ? f / fnOrig : 0, p.zeta);
+      magS[i] = calcMag(fnPrime > 0 ? f / fnPrime : 0, p.zeta);
+    }
+
+    // Background
+    ctx.fillStyle = '#0a0e13';
+    ctx.fillRect(0, 0, w, h);
+
+    // Clip
+    ctx.save();
+    ctx.beginPath(); ctx.rect(ML, MT, cw, ch); ctx.clip();
+
+    // ── Log grid lines (decades) ──
+    const decadeLabels = [];
+    for (let v = Math.pow(10, Math.ceil(Math.log10(yMin))); v <= yMax * 1.01; v *= 10) {
+      decadeLabels.push(v);
+    }
+    ctx.strokeStyle = '#1a2a3a';
+    ctx.lineWidth = 0.5;
+    decadeLabels.forEach(v => {
+      const y = yM(v);
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath(); ctx.moveTo(ML, y); ctx.lineTo(ML + cw, y); ctx.stroke();
+    });
+    ctx.setLineDash([]);
+
+    // Half-decade minor grid
+    ctx.strokeStyle = '#16202e';
+    ctx.lineWidth = 0.4;
+    [0.2, 0.5, 2, 5, 20, 50, 200, 500].forEach(v => {
+      if (v >= yMin && v <= yMax) {
+        const y = yM(v);
+        ctx.setLineDash([2, 4]);
+        ctx.beginPath(); ctx.moveTo(ML, y); ctx.lineTo(ML + cw, y); ctx.stroke();
+      }
+    });
+    ctx.setLineDash([]);
+
+    // |H|=1 line
+    const y1 = yM(1);
+    ctx.strokeStyle = '#2a3a50';
+    ctx.lineWidth = 1.2;
+    ctx.setLineDash([5, 4]);
+    ctx.beginPath(); ctx.moveTo(ML, y1); ctx.lineTo(ML + cw, y1); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#5a6a80';
+    ctx.font = '9px sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText('|H|=1 (0dB)', ML - 4, y1 + 3);
+
+    // Original curve (gray dashed)
+    ctx.strokeStyle = '#5a6a80';
+    ctx.lineWidth = 1.2;
+    ctx.setLineDash([5, 4]);
+    ctx.beginPath();
+    for (let i = 0; i < pts; i++) {
+      const x = xF((maxFreq / pts) * i), y = yM(magO[i]);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    // System curve (purple solid)
+    ctx.strokeStyle = '#9b59b6';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    for (let i = 0; i < pts; i++) {
+      const x = xF((maxFreq / pts) * i), y = yM(magS[i]);
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.restore();
+
+    // ── Y axis ──
+    ctx.fillStyle = '#5a6a80';
+    ctx.font = '9px sans-serif';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'middle';
+    decadeLabels.forEach(v => {
+      const y = yM(v);
+      const label = v >= 1 ? v.toFixed(0) : v.toFixed(1);
+      ctx.fillText(label, ML - 4, y);
+      ctx.strokeStyle = '#3a4a5a';
+      ctx.lineWidth = 0.8;
+      ctx.beginPath(); ctx.moveTo(ML - 2, y); ctx.lineTo(ML, y); ctx.stroke();
+    });
+    ctx.save();
+    ctx.translate(12, MT + ch / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#5a6a80';
+    ctx.font = '10px sans-serif';
+    ctx.fillText('|H(f)| 幅值比（对数）', 0, 0);
+    ctx.restore();
+
+    // ── X axis ──
+    const xStep = maxFreq <= 10 ? 1 : maxFreq <= 20 ? 2 : maxFreq <= 50 ? 5 : maxFreq <= 100 ? 10 : 20;
+    ctx.fillStyle = '#5a6a80';
+    ctx.font = '9px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    for (let f = 0; f <= maxFreq + 0.01; f += xStep) {
+      const x = xF(f);
+      ctx.strokeStyle = '#3a4a5a';
+      ctx.lineWidth = 0.8;
+      ctx.beginPath(); ctx.moveTo(x, MT + ch); ctx.lineTo(x, MT + ch + 3); ctx.stroke();
+      ctx.fillText(f.toFixed(f >= 10 ? 0 : 1), x, MT + ch + 5);
+    }
+    ctx.fillText('频率 (kHz)', xF(maxFreq / 2), MT + ch + 17);
+
+    // ── fn markers ──
+    function idxAtFreq(f) { return Math.round(f / maxFreq * pts); }
+    if (fnOrig > 0 && fnOrig <= maxFreq) {
+      const ox = xF(fnOrig), oy = yM(magO[idxAtFreq(fnOrig)]);
+      ctx.strokeStyle = 'rgba(90,106,128,0.35)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 4]);
+      ctx.beginPath(); ctx.moveTo(ox, MT); ctx.lineTo(ox, MT + ch); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#5a6a80';
+      ctx.beginPath(); ctx.arc(ox, oy, 3, 0, Math.PI * 2); ctx.fill();
+      ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      ctx.font = 'bold 9px sans-serif';
+      ctx.fillStyle = '#5a6a80';
+      ctx.fillText('fn=' + fnOrig.toFixed(1) + 'kHz', ox, MT + 8);
+    }
+
+    if (fnPrime > 0 && fnPrime <= maxFreq) {
+      const sx = xF(fnPrime), sy = yM(magS[idxAtFreq(fnPrime)]);
+      ctx.strokeStyle = 'rgba(155,107,182,0.35)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([3, 3]);
+      ctx.beginPath(); ctx.moveTo(sx, MT); ctx.lineTo(sx, MT + ch); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#9b59b6';
+      ctx.beginPath(); ctx.arc(sx, sy, 3, 0, Math.PI * 2); ctx.fill();
+      ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      ctx.font = 'bold 9px sans-serif';
+      ctx.fillStyle = '#9b59b6';
+      ctx.fillText("fn'=" + fnPrime.toFixed(1) + 'kHz', sx, sy - 5);
+    }
+
+    // ── Empirical markers ──
+    const emps = [
+      { r: 0.2, color: '#3fb950' },
+      { r: 0.3, color: '#d29922' },
+      { r: 0.5, color: '#e06c75' }
+    ];
+    emps.forEach(ep => {
+      const freq = fnPrime * ep.r;
+      if (freq > maxFreq) return;
+      const idx = idxAtFreq(freq);
+      const mag = magS[idx];
+      const pct = (mag - 1) * 100;
+      const db = toDB(mag);
+      const px = xF(freq), py = yM(mag);
+
+      ctx.fillStyle = ep.color;
+      ctx.strokeStyle = '#0a0e13';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(px, py, 4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+      const lx = ML + cw + 3;
+      ctx.strokeStyle = 'rgba(155,107,182,0.2)';
+      ctx.lineWidth = 0.6;
+      ctx.setLineDash([2, 2]);
+      ctx.beginPath(); ctx.moveTo(px + 5, py); ctx.lineTo(lx - 1, py); ctx.stroke();
+      ctx.setLineDash([]);
+
+      ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      ctx.font = 'bold 9px sans-serif';
+      ctx.fillStyle = ep.color;
+      ctx.fillText(ep.r + "fn'=" + freq.toFixed(2) + 'kHz', lx, py - 8);
+      ctx.font = '8px sans-serif';
+      ctx.fillText('|H|=' + mag.toFixed(3) + '  (' + (db >= 0 ? '+' : '') + db.toFixed(2) + 'dB, ' + (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%)', lx, py + 7);
+    });
+
+    // ── Shift arrow ──
+    if (fnOrig > 0 && fnPrime > 0 && fnPrime < fnOrig) {
+      const a1 = xF(fnPrime), a2 = xF(fnOrig), ay = MT + ch - 18;
+      ctx.strokeStyle = 'rgba(210,153,34,0.5)';
+      ctx.lineWidth = 1.2;
+      ctx.beginPath(); ctx.moveTo(a1, ay); ctx.lineTo(a2, ay); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(a1, ay); ctx.lineTo(a1 + 5, ay - 3);
+      ctx.lineTo(a1 + 5, ay + 3); ctx.closePath();
+      ctx.fillStyle = 'rgba(210,153,34,0.5)'; ctx.fill();
+      const delta = fnOrig - fnPrime;
+      ctx.fillStyle = '#d29922';
+      ctx.font = '9px sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      ctx.fillText('Δf=' + delta.toFixed(1) + 'kHz', (a1 + a2) / 2, ay - 2);
+    }
+
+    // ── Legend ──
+    ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    ctx.font = '9px sans-serif';
+    ctx.strokeStyle = '#5a6a80';
+    ctx.lineWidth = 1.2;
+    ctx.setLineDash([5, 4]);
+    ctx.beginPath(); ctx.moveTo(ML, 2); ctx.lineTo(ML + 14, 2); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = '#5a6a80';
+    ctx.fillText('M=0 (原始)', ML + 17, 0);
+    const l2 = ML + 90;
+    ctx.strokeStyle = '#9b59b6';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath(); ctx.moveTo(l2, 2); ctx.lineTo(l2 + 14, 2); ctx.stroke();
+    ctx.fillStyle = '#9b59b6';
+    ctx.fillText('M=' + p.M.toFixed(3) + 'kg (当前)', l2 + 17, 0);
+  }
+
+  // ── Update ──
+  function updateAll() {
+    const p = getParams();
+    const fnPrime = calcFnPrime(p.fn, p.ms, p.M);
+    const peakG = calcPeakGain(p.zeta);
+    const safeF = fnPrime * 0.3;
+
+    const fnRefD = document.getElementById("fnDisplayRef");
+    fnOrigD.textContent = p.fn.toFixed(2) + ' kHz';
+    if (fnRefD) fnRefD.textContent = p.fn.toFixed(2) + ' kHz';
+    fnPrimeD.textContent = fnPrime.toFixed(2) + ' kHz';
+    fnDeltaD.textContent = (p.fn - fnPrime) > 0.01 ? '-' + (p.fn - fnPrime).toFixed(2) + ' kHz' : '0 kHz';
+    peakGainD.textContent = peakG.toFixed(0) + '× (' + toDB(peakG).toFixed(1) + 'dB)';
+    safeFreqD.textContent = '≤ ' + safeF.toFixed(1) + ' kHz (0.3fn\')';
+    safeFreqD.className = 'sl-val' + (safeF < 0.5 ? ' warn' : safeF < 2 ? '' : ' good');
+
+    // Empirical error table: fn + 0.2/0.3/0.5 fn'
+    function fmtMag(r, z) {
+      const m = calcMag(r, z);
+      const db = toDB(m);
+      const pct = (m - 1) * 100;
+      return { db: (db >= 0 ? '+' : '') + db.toFixed(2) + 'dB',
+               pct: (pct >= 0 ? '+' : '') + pct.toFixed(2) + '%' };
+    }
+    function fmtFreq(kHz) {
+      if (fnUnitI.value === 'Hz') return (kHz * 1000).toFixed(0) + ' Hz';
+      return kHz.toFixed(2) + ' kHz';
+    }
+    // Column 0: fn (original sensor peak)
+    const fnDat = fmtMag(1, p.zeta);
+    eD.d[0].textContent = fnDat.db;
+    eD.p[0].textContent = fnDat.pct;
+    eD.f[0].textContent = fmtFreq(p.fn);
+    // Columns 1-3: 0.2/0.3/0.5 fn'
+    [0.2, 0.3, 0.5].forEach((r, i) => {
+      const dat = fmtMag(r, p.zeta);
+      eD.d[i + 1].textContent = dat.db;
+      eD.p[i + 1].textContent = dat.pct;
+      eD.f[i + 1].textContent = fmtFreq(fnPrime * r);
+    });
+    // Column 4: fn' (system resonance after mass loading)
+    const fnPDat = fmtMag(1, p.zeta);
+    eD.d[4].textContent = fnPDat.db;
+    eD.p[4].textContent = fnPDat.pct;
+    eD.f[4].textContent = fmtFreq(fnPrime);
+
+    drawCurve();
+  }
+
+  // ── Load / Save ──
+  function loadConfig() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const c = JSON.parse(raw);
+        setFnKHz(c.fn ?? defaults.fn);
+        zetaI.value = c.zeta ?? defaults.zeta;
+        // Restore with current unit
+        setValWithUnit('ms', 'msUnit', c.ms ?? defaults.ms, 'g');
+        setValWithUnit('M', 'MUnit', c.M ?? defaults.M, 'g');
+      } else {
+        setFnKHz(defaults.fn); zetaI.value = defaults.zeta;
+        setValWithUnit('ms', 'msUnit', defaults.ms, 'g');
+        setValWithUnit('M', 'MUnit', defaults.M, 'g');
+      }
+    } catch (e) {
+      setFnKHz(defaults.fn); zetaI.value = defaults.zeta;
+      setValWithUnit('ms', 'msUnit', defaults.ms, 'g');
+      setValWithUnit('M', 'MUnit', defaults.M, 'g');
+    }
+    updateFnStep();
+    updateAll();
+  }
+
+  // ═══════════════════════════════════════════
+  // Canvas resize — only here, not in drawCurve
+  // ═══════════════════════════════════════════
+  function resizeCanvas() {
+    const wrap = canvas.parentElement;
+    if (!wrap) return;
+    const cw = wrap.clientWidth;
+    const ch = wrap.clientHeight;
+    if (cw > 0 && ch > 0) {
+      canvas.width = cw;
+      canvas.height = ch;
+    }
+  }
+
+  // ── Events ──
+  fnI.addEventListener("input", updateAll);
+  fnUnitI.addEventListener("change", function() {
+    const v = parseFloat(fnI.value) || 0;
+    fnI.value = this.value === 'Hz' ? v * 1000 : v / 1000;
+    updateFnStep(); updateAll();
+  });
+  zetaI.addEventListener("input", updateAll);
+  msI.addEventListener("input", updateAll);
+  MI.addEventListener("input", updateAll);
+  msUnitI.addEventListener("change", function() {
+    const v = parseFloat(msI.value) || 0;
+    msI.value = this.value === 'g' ? v * 1000 : v / 1000;
+    updateAll();
+  });
+  MUnitI.addEventListener("change", function() {
+    const v = parseFloat(MI.value) || 0;
+    MI.value = this.value === 'g' ? v * 1000 : v / 1000;
+    updateAll();
+  });
+
+  btnSave.addEventListener("click", () => {
+    const p = getParams();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ fn: p.fn, zeta: p.zeta, ms: p.ms, M: p.M }));
+    savedToast.classList.add("show");
+    setTimeout(() => { window.location.href = "waveform-generator.html"; }, 600);
+  });
+
+  btnReset.addEventListener("click", () => {
+    setFnKHz(defaults.fn); zetaI.value = defaults.zeta;
+    setValWithUnit('ms', 'msUnit', defaults.ms, 'g');
+    setValWithUnit('M', 'MUnit', defaults.M, 'g');
+    updateAll();
+  });
+
+  window.addEventListener("resize", () => { resizeCanvas(); drawCurve(); });
+
+  // ── Init ──
+  // Wait for layout, then resize + draw
+  requestAnimationFrame(() => {
+    resizeCanvas();
+    loadConfig();
+  });
+})();
+</script>
+
+</body>
+</html>
