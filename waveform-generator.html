@@ -267,7 +267,7 @@ body {
    </div>
    <div class="set-row">
      <label>计算上限</label>
-     <input type="number" id="fftCompMax" value="10000" min="10" max="10000" step="100"> Hz
+     <input type="number" id="fftCompMax" value="1000" min="10" max="10000" step="100"> Hz
      <span class="row-hint" id="fftResHint">Δf=1.22Hz</span>
    </div>
    <div class="row-hint" style="padding-left:48px;margin-top:-2px;color:#d29922;font-size:9px">💡 分析低频信号？降低上限可触发抽取滤波，大幅提升频率分辨率</div>
@@ -2288,7 +2288,7 @@ if (rbT[idx] < targetT) lo = mid + 1;
     redrawAll();
   });
   document.getElementById('fftCompMax').addEventListener('change', e => {
-    fftCompMax = parseInt(e.target.value) || 10000;
+    fftCompMax = parseInt(e.target.value) || 1000;
     specFreqs = null; specMags = null; specCtr = 0;
     updateSpecTitle();
     updateFftResHint();
